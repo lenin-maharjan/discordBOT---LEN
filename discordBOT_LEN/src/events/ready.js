@@ -21,7 +21,7 @@ module.exports = function registerReady(client) {
       console.error('[ERROR] Failed to register commands:', error);
     }
 
-    try { client.user.setActivity('🤖 Powered by Groq AI', { type: 3 }); } catch (_) {}
+    try { client.user.setActivity('Lenin DaDa /play', { type: 3 }); } catch (_) {}
     startDailyScheduler({ client, CONFIG, callGroqAPI, getSystemPrompt });
     startMuteChecker({ client, CONFIG });
   });
