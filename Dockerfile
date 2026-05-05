@@ -7,7 +7,7 @@ RUN apk add --no-cache ffmpeg
 
 # Copy package files from the nested project and install
 COPY discordBOT_LEN/package*.json ./
-RUN npm ci --only=production
+RUN npm install --omit=dev
 
 # Copy application source
 COPY discordBOT_LEN/ .
