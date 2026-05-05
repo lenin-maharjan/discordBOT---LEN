@@ -1,0 +1,25 @@
+# Root-level ignore for repo workspace
+# Node
+node_modules/
+discordBOT_LEN/node_modules/
+
+# Environment and local data
+.env
+bot.db
+
+# Build and logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dist/
+
+# Docker and deployment helpers
+Dockerfile
+.dockerignore
+start.sh
+Procfile
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
