@@ -27,9 +27,35 @@ function logMusicError(label, error) {
 
 async function respondAutocompleteSafely(interaction, choices) {
   try {
+    if (interaction.responded) return;
     await interaction.respond(choices);
   } catch (error) {
+    if (error?.code === 10062 || error?.code === 40060) return;
     logMusicError('Autocomplete respond error:', error);
+  }
+}
+
+async function deferInteractionSafely(interaction) {
+  try {
+    if (interaction.deferred || interaction.replied) return true;
+    await interaction.deferReply();
+    return true;
+  } catch (error) {
+    if (error?.code === 10062 || error?.code === 40060) return false;
+    throw error;
+  }
+}
+
+async function editOrFollowUp(interaction, payload) {
+  try {
+    if (interaction.deferred || interaction.replied) {
+      return await interaction.editReply(payload);
+    }
+
+    return await interaction.reply(payload);
+  } catch (error) {
+    if (error?.code === 10062 || error?.code === 40060) return null;
+    throw error;
   }
 }
 
@@ -85,7 +111,8 @@ async function playMusic(interaction) {
     });
   }
 
-  await interaction.deferReply();
+  const deferred = await deferInteractionSafely(interaction);
+  if (!deferred) return null;
 
   // Determine the correct search engine based on query type
   let searchEngine;
@@ -149,10 +176,10 @@ async function playMusic(interaction) {
 
       // Show different message for playlists vs single tracks
       if (searchEngine === QueryType.YOUTUBE_PLAYLIST || searchEngine === QueryType.SOUNDCLOUD_PLAYLIST || playlistTracksCount > 1) {
-        return interaction.editReply(`📋 Queued **${queueSize} tracks** from playlist! Now playing: **${title}**`);
+        return editOrFollowUp(interaction, `📋 Queued **${queueSize} tracks** from playlist! Now playing: **${title}**`);
       }
 
-      return interaction.editReply(`🎵 Now playing: **${title}** by ${track?.author || 'unknown'}`);
+        return editOrFollowUp(interaction, `🎵 Now playing: **${title}** by ${track?.author || 'unknown'}`);
   } catch (error) {
     logMusicError('Play command error:', error);
 
@@ -168,13 +195,13 @@ async function playMusic(interaction) {
           }
         });
         console.log(`[MUSIC] Retry success: "${track.title}"`);
-        return interaction.editReply(`🎵 Now playing: **${track.title}** by ${track.author}`);
+        return editOrFollowUp(interaction, `🎵 Now playing: **${track.title}** by ${track.author}`);
       } catch (retryError) {
         logMusicError('Retry also failed:', retryError);
       }
     }
 
-    return interaction.editReply('❌ Could not play that track. Try searching by song name instead!');
+    return editOrFollowUp(interaction, '❌ Could not play that track. Try searching by song name instead!');
   }
 }
 
