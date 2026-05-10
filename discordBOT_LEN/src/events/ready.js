@@ -6,7 +6,7 @@ const { startDailyScheduler, startMuteChecker } = require('../services/scheduler
 const { callGroqAPI, getSystemPrompt } = require('../services/ai');
 
 module.exports = function registerReady(client) {
-  client.once('ready', async () => {
+  client.once('clientReady', async () => {
     console.log(`[OK] Logged in as ${client.user.tag}`);
     await initializePlayer(client);
 
